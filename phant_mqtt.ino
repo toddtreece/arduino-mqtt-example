@@ -34,7 +34,7 @@ int sliderTwoPin = 6;
 /**
  * setup
  *
- * decalled when the sketch starts. this
+ * called when the sketch starts. this
  * is where the network connection is initialized,
  * and where the connection to the MQTT broker is started.
  */
@@ -55,7 +55,7 @@ void setup() {
   sliderState(sliderOnePin, 0);
   sliderState(sliderTwoPin, 0);
 
-  // attempt to conenct to access point
+  // attempt to connect to access point
   if (!WiFly.join(ssid, passphrase)) {
     DEBUG("Association failed");
     while (1) {} // hang if connection failed
@@ -170,8 +170,8 @@ void buttonState(int pin, int on) {
 /**
  * sliderState
  *
- * changes the state of the digital pin
- * to high or low based on payload value
+ * changes the value of the slider
+ * to the payload value if it falls within 0-255
  */
 void sliderState(int pin, int value) {
 
