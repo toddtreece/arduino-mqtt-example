@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title></title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <div class="container-fluid">
+
+      <div class="row">
+
+        <div class="col-md-12">
+
+          <h1>Arduino MQTT Example</h1>
+
+          <p>
+            The public stream can <a href="https://data.sparkfun.com/streams/WGRd11VpGLT5mr00OrQ7">be found here.</a>
+          </p>
+
+          <form class="control-arduino" role="form">
+
+            <input type="hidden" name="private_key" value="XRdWppPVR9ulWMdd6MRe">
+
+            <div class="form-group">
+              <label>Button</label>
+              <div class="btn-group" data-toggle="buttons">
+                <label class="btn btn-danger">
+                  <input type="radio" name="button" value="0"> Off
+                </label>
+                <label class="btn btn-success">
+                  <input type="radio" name="button" value="1"> On
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label style="padding-right:20px;">Slider One</label>
+              <input name="slider_one" data-slider-id="slider_one" type="text" data-slider-min="0" data-slider-max="255" data-slider-step="1" data-slider-value="0"/>
+            </div>
+
+            <div class="form-group">
+              <label style="padding-right:20px;">Slider Two</label>
+              <input name="slider_two" data-slider-id="slider_two" type="text" data-slider-min="0" data-slider-max="255" data-slider-step="1" data-slider-value="0"/>
+            </div>
+
+          </form>
+
+        </div>
+
+      </div>
+
+      <div class="row">
+
+        <div class="col-md-12">
+
+          <h2>Debug</h2>
+
+          <pre id="debug"></pre>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+
+    <script>
+
+      var pub = 'WGRd11VpGLT5mr00OrQ7',
+          prv = 'XRdWppPVR9ulWMdd6MRe',
+          timer;
+
+      $('input[name=slider_one]').slider().on('slideStop', function() {
+        $(this).trigger('change');
+      });
+
+      $('input[name=slider_two]').slider().on('slideStop', function() {
+        $(this).trigger('change');
+      });
+
+      // value init
+      $.get('https://data.sparkfun.com/output/' + pub + '/latest.json', function(response) {
+
+        if(response[0].button == '1') {
+          $('input[name=button][value=1]').closest('.btn').button('toggle');
+        } else {
+          $('input[name=button][value=0]').closest('.btn').button('toggle');
+        }
+
+        $('input[name=slider_one]').slider('setValue', parseInt(response[0].slider_one));
+        $('input[name=slider_two]').slider('setValue', parseInt(response[0].slider_two));
+
+        $('form input').on('change', function() {
+
+          if(timer) {
+            clearTimeout(timer);
+          }
+
+          timer = setTimeout(function() {
+
+            $.ajax({
+              url: 'https://data.sparkfun.com/input/' + pub + '.json',
+              data: $('form.control-arduino').serialize(),
+              headers: {
+                'Phant-Private-Key': prv
+              },
+              success: function(response) {
+                $('#debug').append(JSON.stringify(response) + '\n');
+              }
+            });
+
+          }, 400);
+
+        });
+
+      });
+
+    </script>
+
+  </body>
+</html>
